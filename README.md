@@ -2,7 +2,7 @@
 
 # SlotMachine.sol • ![license](https://img.shields.io/github/license/zeroknots/slotmachine?label=license) ![solidity](https://img.shields.io/badge/solidity-^0.8.19-lightgrey)
 
-SlotMachine is a specialized security testing framework designed to detect hazardous storage writes in Solidity contracts. By leveraging the power of this innovative tool, developers can ensure their contracts maintain a high level of security and reliability.
+SlotMachine is a specialized security testing library designed to detect hazardous storage writes in Solidity contracts. By leveraging the power of this innovative tool, developers can ensure their contracts maintain a high level of security and reliability.
 
 ### How does it work?
 
