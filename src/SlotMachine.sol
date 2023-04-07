@@ -12,7 +12,6 @@ struct SlotMachineLog {
 }
 
 
-
 address constant SLOTMACHINE_ETCH_ADDR = address(0x11119696969696969696);
 
 abstract contract SlotMachine is Test {
@@ -58,11 +57,6 @@ abstract contract SlotMachine is Test {
         vm.record();
         slotmachine = SlotMachine(targetAddr);
     }
-
-    // function logSSTORE(bytes32 _slot, bytes32 _key, bytes32 _keccakResult) external {
-    //     SlotMachineLog memory log = SlotMachineLog(_slot, _key, _keccakResult, block.number);
-    //     allLogs.push(log);
-    // }
 
     /**
      * Callback function that will be called by the target contract
