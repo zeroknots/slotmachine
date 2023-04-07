@@ -11,6 +11,10 @@ struct SlotMachineLog {
     uint256 blockNumber;
 }
 
+
+
+address constant SLOTMACHINE_ETCH_ADDR = address(0x11119696969696969696);
+
 abstract contract SlotMachine is Test {
     SlotMachineLog[] public allLogs;
     SlotMachine slotmachine;
@@ -49,11 +53,16 @@ abstract contract SlotMachine is Test {
 
     function setUp() public virtual {
         bytes memory code = address(this).code;
-        address targetAddr = address(0x9696969696);
+        address targetAddr = SLOTMACHINE_ETCH_ADDR;
         vm.etch(targetAddr, code);
         vm.record();
         slotmachine = SlotMachine(targetAddr);
     }
+
+    // function logSSTORE(bytes32 _slot, bytes32 _key, bytes32 _keccakResult) external {
+    //     SlotMachineLog memory log = SlotMachineLog(_slot, _key, _keccakResult, block.number);
+    //     allLogs.push(log);
+    // }
 
     /**
      * Callback function that will be called by the target contract
@@ -61,7 +70,7 @@ abstract contract SlotMachine is Test {
      * @param _key  EVM storage key
      * @param _keccakResult  keccak256(_slot, _key)
      */
-    function logSSTORE(bytes32 _slot, bytes32 _key, bytes32 _keccakResult) external {
+    function slotMachineLog(bytes32 _slot, bytes32 _key, bytes32 _keccakResult) external {
         SlotMachineLog memory log = SlotMachineLog(_slot, _key, _keccakResult, block.number);
         allLogs.push(log);
     }

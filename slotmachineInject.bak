@@ -1,0 +1,18 @@
+function fun__logSlot_1337(mappingSlot, mappingKey, keccakSlot) {
+
+    /// @src 0:805:817  "0x11119696969696969696"
+    let slotMachine_Addr := 0x11119696969696969696
+    //    function logSlot(bytes32 slot, bytes32 key, bytes32 keccakResult) internal
+    let functionHash := 0x05dfbcc06611f25ca8dbfdaa208a18820e782332ec41e97b86b3a65797df1cbd
+    // let expr_70 := convert_t_bytes32_to_t_bytes4(expr_69)
+    let functionSig := and(functionHash, 0xffffffff00000000000000000000000000000000000000000000000000000000)
+    {
+        let usr$ptr := mload(0x40)
+        mstore(usr$ptr, functionSig)
+        mstore(add(usr$ptr, 0x04), mappingSlot)
+        mstore(add(usr$ptr, 0x24), mappingKey)
+        mstore(add(usr$ptr, 0x44), keccakSlot)
+        let usr$success := call(gas(), slotMachine_Addr, 0, usr$ptr, 0x64, 0, 0)
+        if iszero(usr$success) { revert(0, 0) }
+    }
+}

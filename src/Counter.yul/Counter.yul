@@ -33,35 +33,25 @@ object "Counter_1337" {
     /// @use-src 0:"src/Counter.sol"
     object "Counter_1337_deployed" {
         code {
-function fun__logSlot_1337(var_slot_49, var_key_51, var_keccakresult_53) {
+        function fun__logSlot_1337(mappingSlot, mappingKey, keccakSlot) {
 
-                /// @src 0:805:817  "0x9696969696"
-                let expr_60 := 0x9696969696
-                /// @src 0:797:818  "address(0x9696969696)"
-                let expr_61 := expr_60 
-                /// @src 0:776:818  "address logAddress = address(0x9696969696)"
-                let var_logAddress_57 := expr_61
-                /// @src 0:854:901  "keccak256(\"logSSTORE(bytes32,bytes32,bytes32)\")"
-                let expr_69 := 0x246e185ecff0abf4413189a686037d9e0d3cfcd779c1c323cafba215b05098b1
-                /// @src 0:847:902  "bytes4(keccak256(\"logSSTORE(bytes32,bytes32,bytes32)\"))"
-                // let expr_70 := convert_t_bytes32_to_t_bytes4(expr_69)
-                let expr_70 := and(expr_69, 0xffffffff00000000000000000000000000000000000000000000000000000000)
-                /// @src 0:829:902  "bytes4 selector = bytes4(keccak256(\"logSSTORE(bytes32,bytes32,bytes32)\"))"
-                let var_selector_64 := expr_70
-                /// @src 0:912:1250  "assembly {..."
-                {
-                    let usr$ptr := mload(0x40)
-                    mstore(usr$ptr, var_selector_64)
-                    mstore(add(usr$ptr, 0x04), var_slot_49)
-                    mstore(add(usr$ptr, 0x24), var_key_51)
-                    mstore(add(usr$ptr, 0x44), var_keccakresult_53)
-                    let usr$success := call(gas(), var_logAddress_57, 0, usr$ptr, 0x64, 0, 0)
-                    if iszero(usr$success) { revert(0, 0) }
-                }
-
+            /// @src 0:805:817  "0x11119696969696969696"
+            let slotMachine_Addr := 0x11119696969696969696
+            //    function logSlot(bytes32 slot, bytes32 key, bytes32 keccakResult) internal
+            let functionHash := 0x05dfbcc06611f25ca8dbfdaa208a18820e782332ec41e97b86b3a65797df1cbd
+            // let expr_70 := convert_t_bytes32_to_t_bytes4(expr_69)
+            let functionSig := and(functionHash, 0xffffffff00000000000000000000000000000000000000000000000000000000)
+            {
+                let usr$ptr := mload(0x40)
+                mstore(usr$ptr, functionSig)
+                mstore(add(usr$ptr, 0x04), mappingSlot)
+                mstore(add(usr$ptr, 0x24), mappingKey)
+                mstore(add(usr$ptr, 0x44), keccakSlot)
+                let usr$success := call(gas(), slotMachine_Addr, 0, usr$ptr, 0x64, 0, 0)
+                if iszero(usr$success) { revert(0, 0) }
             }
+        }
 
-          
             /// @src 0:734:1281  "contract Counter {..."
             mstore(64, memoryguard(128))
 
