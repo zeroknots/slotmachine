@@ -4,29 +4,45 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 import "openzeppelin-contracts/contracts/utils/Strings.sol";
 
-struct SSTORELog {
+struct SlotMachineLog {
     bytes32 slot;
     bytes32 value;
     bytes32 keccak256Slot;
     uint256 blockNumber;
 }
 
-abstract contract StorageBuster is Test {
-    SSTORELog[] public allLogs;
-    StorageBuster storageBuster;
+abstract contract SlotMachine is Test {
+    SlotMachineLog[] public allLogs;
+    SlotMachine slotmachine;
 
     bytes32[] public whitelistedSlots;
 
     address target;
 
-    function getAllLogs() external returns (SSTORELog[] memory) {
+    function deployBytecode(bytes memory _bytecode) public returns (address) {
+        address contractAddress;
+        assembly {
+            contractAddress := create(0, add(_bytecode, 0x20), mload(_bytecode))
+        }
+        return contractAddress;
+    }
+
+    function deployContract(string memory name) public returns (address) {
+        // _1337 will be added to all the yul objects in the 'backdoored' yul contract
+        string memory bytecodeIdentifier = ".yul:Counter_1337";
+        bytes memory bytecode = abi.encodePacked(vm.getCode(string(abi.encodePacked(name, bytecodeIdentifier))));
+        address contractAddress = deployBytecode(bytecode);
+        return contractAddress;
+    }
+
+    function getAllLogs() external view returns (SlotMachineLog[] memory) {
         return allLogs;
     }
 
-    modifier useSTORELog(address _target) {
+    modifier useSlotMachine(address _target) {
         target = _target;
         _;
-        for (uint256 i = 0; i < storageBuster.getAllLogs().length; i++) {
+        for (uint256 i = 0; i < slotmachine.getAllLogs().length; i++) {
             printLog(i);
         }
     }
@@ -36,18 +52,23 @@ abstract contract StorageBuster is Test {
         address targetAddr = address(0x9696969696);
         vm.etch(targetAddr, code);
         vm.record();
-        storageBuster = StorageBuster(targetAddr);
-
+        slotmachine = SlotMachine(targetAddr);
     }
 
+    /**
+     * Callback function that will be called by the target contract
+     * @param _slot EVM storage base slot
+     * @param _key  EVM storage key
+     * @param _keccakResult  keccak256(_slot, _key)
+     */
     function logSSTORE(bytes32 _slot, bytes32 _key, bytes32 _keccakResult) external {
-        SSTORELog memory log = SSTORELog(_slot, _key, _keccakResult, block.number);
+        SlotMachineLog memory log = SlotMachineLog(_slot, _key, _keccakResult, block.number);
         allLogs.push(log);
     }
 
-    function whitelistStorage(bytes32 slot) public {
+    function slotWhitelist(bytes32 slot, uint256 offset) public {
         whitelistedSlots.push(slot);
-        for (uint256 i = 0; i < 100; i++) {
+        for (uint256 i = 0; i < offset; i++) {
             bytes32 nextSlot;
             assembly {
                 nextSlot := add(slot, i)
@@ -76,9 +97,9 @@ abstract contract StorageBuster is Test {
     }
 
     function printLog(uint256 index) public {
-        SSTORELog[] memory logs = storageBuster.getAllLogs();
+        SlotMachineLog[] memory logs = slotmachine.getAllLogs();
         for (uint256 i = 0; i < logs.length; i++) {
-            SSTORELog memory log = logs[i];
+            SlotMachineLog memory log = logs[i];
 
             string memory valueStr = Strings.toHexString(uint256(log.value), 32);
             string memory slotStr = Strings.toHexString(uint256(log.slot), 32);
@@ -90,9 +111,10 @@ abstract contract StorageBuster is Test {
                 whitelistedSlots.push(log.keccak256Slot);
             } else {
                 console2.log("\n[SLOT] %s \n[VALUE] %s \n=> [keccack] %s [!ALERT!]", slotStr, valueStr, keccakStr);
-                revert SSTORE_ALERT_SLOT(log.keccak256Slot);
+                revert SLOTMACHINE_SSTORE_ALERT(log.keccak256Slot);
             }
         }
     }
-    error SSTORE_ALERT_SLOT(bytes32 slot);
+
+    error SLOTMACHINE_SSTORE_ALERT(bytes32 slot);
 }
