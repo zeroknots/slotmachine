@@ -8,24 +8,15 @@ SlotMachine is a specialized security testing library designed to detect hazardo
 
 SlotMachine streamlines the testing process by performing the following steps:
 
-Transpiling any Solidity contract to Yul using solc --via-ir
-Injecting a Yul function into the file, responsible for logging
-Injecting the logging function call into all Yul functions that implement the keccak calculation for a mapping
-Compiling the Yul code into EVM bytecode
-Attaching the SlotMachine contract to a predetermined address on the revm.
+- Transpiling any Solidity contract to Yul using solc --via-ir
+- Injecting a Yul function into the file, responsible for logging
+- Injecting the logging function call into all Yul functions that implement the keccak calculation for a mapping
+- Compiling the Yul code into EVM bytecode
+- Attaching the SlotMachine contract to a predetermined address on the revm.
+
 By simply inheriting from SlotMachine, developers can effortlessly create test cases that flag hazardous or unexpected SSTORE operations. This powerful tool not only enhances the security of your contracts but also provides invaluable insights into potential vulnerabilities.
 
 ### Usage
-
-To ensure secure and efficient storage testing in your smart contracts, follow the steps below to effectively use SlotMachine:
-
-Inherit from the SlotMachine contract in your Foundry tests.
-Call super.setUp() to initiate SlotMachine.
-Whitelist any storage positions and offsets that should be ignored by SlotMachine.
-Deploy the target contract using deployContract(contractName).
-Here is an example of how to structure your test contract:
-
-### How to Use
 
 To ensure secure and efficient storage testing in your smart contracts, follow the steps below to effectively use SlotMachine:
 
@@ -45,11 +36,12 @@ contract CounterStorageTest is SlotMachine {
         super.setUp();
         // define the storage slot are 'OK' to be used by the target contract
         bytes32 defaultSlot = keccak256("counter.storage");
+        // whitelist 100 contiguous slots starting from & including `defaultSlot`
         slotWhitelist(defaultSlot, 100);
 
         // name of target contract
         string memory name = "Counter";
-        // get the bytecode of the target contract, depliyed at this address
+        // get the bytecode of the target contract, deployed at this address
         exampleContract = ICounter(deployContract(name));
     }
 
@@ -60,22 +52,21 @@ contract CounterStorageTest is SlotMachine {
 }
 ```
 
-
 To execute the tests, run the following commands:
+
 ```bash
 ./slotmachine.sh Counter  # replace with your target contract name
 forge test
 ```
 
-
-The script will inject the following snipped in your target code:
+The script will inject the following snippet in your target code:
 
 ```solidity
 function fun__logSlot_1337(mappingSlot, mappingKey, keccakSlot) {
 
     /// @src 0:805:817  "0x11119696969696969696"
     let slotMachine_Addr := 0x11119696969696969696
-    //    function logSlot(bytes32 slot, bytes32 key, bytes32 keccakResult) internal
+    // function logSlot(bytes32 slot, bytes32 key, bytes32 keccakResult) internal
     let functionHash := 0x05dfbcc06611f25ca8dbfdaa208a18820e782332ec41e97b86b3a65797df1cbd
     // let expr_70 := convert_t_bytes32_to_t_bytes4(expr_69)
     let functionSig := and(functionHash, 0xffffffff00000000000000000000000000000000000000000000000000000000)
@@ -93,10 +84,10 @@ function fun__logSlot_1337(mappingSlot, mappingKey, keccakSlot) {
 ```
 
 And invoke the `fun__logSlot_1337()` for every mapping reference
+
 ```solidity
 fun__logSlot_1337(slot,key,dataSlot)
 ```
-
 
 In case of an SSTORE violation, you will receive an error message:
 
@@ -110,27 +101,25 @@ By running the tests in verbose mode using `forge test -vvvvv`, you can view all
 forge test -vvvvv
 [...]
 --------
-  
-[SLOT] 0x0bec8ab077af1e12783ac8c970bca6dada042613c1ff87b4d0953dea6b011600 
-[VALUE] 0x0000000000000000000000000000000000000000000000000000000000000000 
-=> [keccack] 0x5935cfefbbd8605fc2d5027f8ea298804734a63f6e8acc97a88d646e14f53be0 [!OK!]
-  
+
+[SLOT] 0x0bec8ab077af1e12783ac8c970bca6dada042613c1ff87b4d0953dea6b011600
+[VALUE] 0x0000000000000000000000000000000000000000000000000000000000000000
+=> [keccak] 0x5935cfefbbd8605fc2d5027f8ea298804734a63f6e8acc97a88d646e14f53be0 [!OK!]
+
 
 --------
-  
-[SLOT] 0x5935cfefbbd8605fc2d5027f8ea298804734a63f6e8acc97a88d646e14f53be0 
-[VALUE] 0x0000000000000000000000000000000000000000000000000000000000000000 
-=> [keccack] 0xe0a0cdcf88a393a2db0b6bdb7abb6d52da1e1500c3523dc023b9046db782d20f [!OK!]
-  
+
+[SLOT] 0x5935cfefbbd8605fc2d5027f8ea298804734a63f6e8acc97a88d646e14f53be0
+[VALUE] 0x0000000000000000000000000000000000000000000000000000000000000000
+=> [keccak] 0xe0a0cdcf88a393a2db0b6bdb7abb6d52da1e1500c3523dc023b9046db782d20f [!OK!]
+
 
 --------
-  
-[SLOT] 0x2031468f0c30f7087de4da9398818763b546d7f89935fa65485c24ff1df26bf4 
-[VALUE] 0x0000000000000000000000000000000000000000000000000000000000077777 
-=> [keccack] 0xed45ccd09931c6e422f2b385da45ff76edb71aea2a6e834fb421dde2ffe89b76 [!ALERT!]
+
+[SLOT] 0x2031468f0c30f7087de4da9398818763b546d7f89935fa65485c24ff1df26bf4
+[VALUE] 0x0000000000000000000000000000000000000000000000000000000000077777
+=> [keccak] 0xed45ccd09931c6e422f2b385da45ff76edb71aea2a6e834fb421dde2ffe89b76 [!ALERT!]
 ```
-
-
 
 ### Disclaimer
 
