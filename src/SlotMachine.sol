@@ -69,6 +69,11 @@ abstract contract SlotMachine is Test {
         allLogs.push(log);
     }
 
+    /**
+     * Whitelist storage slots that are allowed to be modified
+     * @param slot starting slot to whitelist
+     * @param offset no. of offsets / slots to whitelist
+     */
     function slotWhitelist(bytes32 slot, uint256 offset) public {
         whitelistedSlots.push(slot);
         for (uint256 i = 0; i < offset; i++) {
@@ -110,10 +115,10 @@ abstract contract SlotMachine is Test {
 
             console2.log("\n\n--------");
             if (isAllowedSlot(log.slot)) {
-                console2.log("\n[SLOT] %s \n[VALUE] %s \n=> [keccack] %s [!OK!]", slotStr, valueStr, keccakStr);
+                console2.log("\n[SLOT] %s \n[VALUE] %s \n=> [keccak] %s [!OK!]", slotStr, valueStr, keccakStr);
                 whitelistedSlots.push(log.keccak256Slot);
             } else {
-                console2.log("\n[SLOT] %s \n[VALUE] %s \n=> [keccack] %s [!ALERT!]", slotStr, valueStr, keccakStr);
+                console2.log("\n[SLOT] %s \n[VALUE] %s \n=> [keccak] %s [!ALERT!]", slotStr, valueStr, keccakStr);
                 revert SLOTMACHINE_SSTORE_ALERT(log.keccak256Slot);
             }
         }
